@@ -25,8 +25,6 @@
 #include <gst/gst.h>
 #include <gst/video/videooverlay.h>
 
-#include <string.h>
-
 static void window_closed (GtkWidget *widget, GdkEvent *event, gpointer user_data)
 {
   GstElement *pipeline = user_data;
