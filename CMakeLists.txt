@@ -5,6 +5,8 @@ PROJECT(piroverc)
 SET(piroverc_SOURCES
 
   main.c
+  control.c
+  net.c
 
 )
 
@@ -12,7 +14,7 @@ ADD_DEFINITIONS(-std=c99)
 
 INCLUDE(FindPkgConfig)
 
-PKG_CHECK_MODULES (DEPS REQUIRED glib-2.0 gstreamer-1.0 gtk+-3.0)
+PKG_CHECK_MODULES (DEPS REQUIRED glib-2.0 gio-2.0 gstreamer-1.0 gtk+-3.0 sdl2)
 INCLUDE_DIRECTORIES(${DEPS_INCLUDE_DIRS})
 LINK_DIRECTORIES(${DEPS_LIBRARY_DIRS})
 

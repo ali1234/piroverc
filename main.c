@@ -25,6 +25,11 @@
 #include <gst/gst.h>
 #include <gst/video/videooverlay.h>
 
+#include <SDL.h>
+
+#include "control.h"
+#include "net.h"
+
 static void window_closed (GtkWidget *widget, GdkEvent *event, gpointer user_data)
 {
   GstElement *pipeline = user_data;
@@ -54,8 +59,8 @@ int main (int argc, char **argv)
 
     /* prepare the pipeline */
 
-    pipeline = gst_parse_launch("rtspsrc location=\"rtsp://192.168.0.165:8554/test\" ! rtph264depay ! avdec_h264 ! xvimagesink sync=false name=sink", &err);
-    //pipeline = gst_parse_launch("videotestsrc ! xvimagesink name=sink", &err);
+    //pipeline = gst_parse_launch("rtspsrc location=\"rtsp://192.168.0.165:8554/test\" ! rtph264depay ! avdec_h264 ! xvimagesink sync=false name=sink", &err);
+    pipeline = gst_parse_launch("videotestsrc ! xvimagesink name=sink", &err);
     g_assert(err == NULL);
 
     /* prepare the ui */
@@ -64,11 +69,11 @@ int main (int argc, char **argv)
     g_signal_connect (G_OBJECT (window), "delete-event",
         G_CALLBACK (window_closed), (gpointer) pipeline);
     gtk_window_set_default_size (GTK_WINDOW (window), 1000, 600);
-    gtk_window_set_title (GTK_WINDOW (window), "GstVideoOverlay Gtk+ demo");
+    gtk_window_set_title (GTK_WINDOW (window), "PiRover Control");
 
     video_window = gtk_drawing_area_new ();
     gtk_container_add (GTK_CONTAINER (window), video_window);
-    gtk_container_set_border_width (GTK_CONTAINER (window), 16);
+    gtk_container_set_border_width (GTK_CONTAINER (window), 0);
 
     gtk_widget_show_all (window);
 
@@ -87,6 +92,9 @@ int main (int argc, char **argv)
     /* TODO: everything else */
 
     g_timeout_add_seconds (1, (GSourceFunc)do_nothing, pipeline);
+
+    control_start();
+    net_start();
 
     gtk_main ();
 
