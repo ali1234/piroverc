@@ -32,7 +32,7 @@
 
 static void window_closed (GtkWidget *widget, GdkEvent *event, gpointer user_data)
 {
-  GstElement *pipeline = user_data;
+  GstElement *pipeline = (GstElement *)user_data;
 
   gtk_widget_hide (widget);
   gst_element_set_state (pipeline, GST_STATE_NULL);

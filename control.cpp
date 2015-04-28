@@ -62,7 +62,7 @@ void control_set_flags(signed short f)
     g_mutex_unlock (&control_mutex);
 }
 
-void control_get_packet(unsigned char *buf)
+void control_get_packet(char *buf)
 {
     g_mutex_lock (&control_mutex);
 
@@ -87,8 +87,8 @@ void control_get_packet(unsigned char *buf)
 static gboolean get_controls (gpointer unused, gboolean ignored)
 {
     SDL_JoystickUpdate();
-    int a = -SDL_GameControllerGetAxis(gc, 3);
-    int b = -SDL_GameControllerGetAxis(gc, 1);
+    int a = -SDL_GameControllerGetAxis(gc, SDL_CONTROLLER_AXIS_RIGHTY );
+    int b = -SDL_GameControllerGetAxis(gc, SDL_CONTROLLER_AXIS_LEFTY);
     unsigned short da = 0, db = 0;
 
     if(a < -8000) {

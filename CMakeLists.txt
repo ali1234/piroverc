@@ -4,13 +4,11 @@ PROJECT(piroverc)
 
 SET(piroverc_SOURCES
 
-  main.c
-  control.c
-  net.c
+  main.cpp
+  control.cpp
+  net.cpp
 
 )
-
-ADD_DEFINITIONS(-std=c99)
 
 INCLUDE(FindPkgConfig)
 
