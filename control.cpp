@@ -53,6 +53,42 @@ void control_set_lights(signed short l)
     g_mutex_unlock (&control_mutex);
 }
 
+void control_set_headlights(gboolean on)
+{
+    g_mutex_lock (&control_mutex);
+
+    if (on)
+        lights |= 1;
+    else
+        lights &= ~1;
+
+    g_mutex_unlock (&control_mutex);
+}
+
+void control_set_taillights(gboolean on)
+{
+    g_mutex_lock (&control_mutex);
+
+    if (on)
+        lights |= 2;
+    else
+        lights &= ~2;
+
+    g_mutex_unlock (&control_mutex);
+}
+
+void control_set_hazardlights(gboolean on)
+{
+    g_mutex_lock (&control_mutex);
+
+    if (on)
+        lights |= 4;
+    else
+        lights &= ~4;
+
+    g_mutex_unlock (&control_mutex);
+}
+
 void control_set_flags(signed short f)
 {
     g_mutex_lock (&control_mutex);

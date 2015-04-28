@@ -39,16 +39,62 @@ static void window_closed (GtkWidget *widget, GdkEvent *event, gpointer user_dat
   gtk_main_quit ();
 }
 
-static gboolean do_nothing (GstElement *pipeline, gboolean ignored)
+void toggle_headlights (GtkToggleToolButton *toggletoolbutton, gpointer user_data)
 {
-    return TRUE;
+    control_set_headlights(gtk_toggle_tool_button_get_active(toggletoolbutton));
 }
 
+void toggle_taillights (GtkToggleToolButton *toggletoolbutton, gpointer user_data)
+{
+    control_set_taillights(gtk_toggle_tool_button_get_active(toggletoolbutton));
+}
+
+void toggle_hazardlights (GtkToggleToolButton *toggletoolbutton, gpointer user_data)
+{
+    control_set_hazardlights(gtk_toggle_tool_button_get_active(toggletoolbutton));
+}
+
+GtkWidget *make_toolbar(void)
+{
+    GtkWidget *toolbar;
+
+    GtkToolItem *headlights;
+    GtkToolItem *taillights;
+    GtkToolItem *hazardlights;
+
+    toolbar = gtk_toolbar_new ();
+    gtk_toolbar_set_style(GTK_TOOLBAR(toolbar), GTK_TOOLBAR_BOTH);
+
+    headlights = gtk_toggle_tool_button_new();
+    gtk_tool_button_set_label (GTK_TOOL_BUTTON (headlights), "Head Lights");
+    gtk_toolbar_insert(GTK_TOOLBAR(toolbar), headlights, -1);
+
+    taillights = gtk_toggle_tool_button_new();
+    gtk_tool_button_set_label (GTK_TOOL_BUTTON (taillights), "Tail Lights");
+    gtk_toolbar_insert(GTK_TOOLBAR(toolbar), taillights, -1);
+
+    hazardlights = gtk_toggle_tool_button_new();
+    gtk_tool_button_set_label (GTK_TOOL_BUTTON (hazardlights), "Hazard Lights");
+    gtk_toolbar_insert(GTK_TOOLBAR(toolbar), hazardlights, -1);
+
+
+
+    g_signal_connect(G_OBJECT(headlights), "toggled",
+        G_CALLBACK(toggle_headlights), NULL);
+
+    g_signal_connect(G_OBJECT(taillights), "toggled",
+        G_CALLBACK(toggle_taillights), NULL);
+
+    g_signal_connect(G_OBJECT(hazardlights), "toggled",
+        G_CALLBACK(toggle_hazardlights), NULL);
+
+    return toolbar;
+}
 
 int main (int argc, char **argv)
 {
     GdkWindow *video_window_xwindow;
-    GtkWidget *window, *video_window;
+    GtkWidget *window, *video_window, *vbox;
     GstElement *pipeline, *sink;
     gulong embed_xid;
     GstStateChangeReturn sret;
@@ -71,9 +117,13 @@ int main (int argc, char **argv)
     gtk_window_set_default_size (GTK_WINDOW (window), 1000, 600);
     gtk_window_set_title (GTK_WINDOW (window), "PiRover Control");
 
+    vbox = gtk_vbox_new(FALSE, 0);
+    gtk_container_add (GTK_CONTAINER (window), vbox);
+
+    gtk_box_pack_start(GTK_BOX(vbox), make_toolbar(), FALSE, FALSE, 5);
+
     video_window = gtk_drawing_area_new ();
-    gtk_container_add (GTK_CONTAINER (window), video_window);
-    gtk_container_set_border_width (GTK_CONTAINER (window), 0);
+    gtk_container_add (GTK_CONTAINER (vbox), video_window);
 
     gtk_widget_show_all (window);
 
@@ -90,8 +140,6 @@ int main (int argc, char **argv)
         gst_element_set_state (pipeline, GST_STATE_NULL);
 
     /* TODO: everything else */
-
-    g_timeout_add_seconds (1, (GSourceFunc)do_nothing, pipeline);
 
     control_start();
     net_start();
