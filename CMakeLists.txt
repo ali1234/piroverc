@@ -7,6 +7,7 @@ SET(piroverc_SOURCES
   main.cpp
   control.cpp
   net.cpp
+  videowindow.cpp
 
 )
 

@@ -25,76 +25,13 @@
 #include <gst/gst.h>
 #include <gst/video/videooverlay.h>
 
-#include <SDL.h>
-
+#include "videowindow.h"
 #include "control.h"
 #include "net.h"
 
-static void window_closed (GtkWidget *widget, GdkEvent *event, gpointer user_data)
-{
-  GstElement *pipeline = (GstElement *)user_data;
-
-  gtk_widget_hide (widget);
-  gst_element_set_state (pipeline, GST_STATE_NULL);
-  gtk_main_quit ();
-}
-
-void toggle_headlights (GtkToggleToolButton *toggletoolbutton, gpointer user_data)
-{
-    control_set_headlights(gtk_toggle_tool_button_get_active(toggletoolbutton));
-}
-
-void toggle_taillights (GtkToggleToolButton *toggletoolbutton, gpointer user_data)
-{
-    control_set_taillights(gtk_toggle_tool_button_get_active(toggletoolbutton));
-}
-
-void toggle_hazardlights (GtkToggleToolButton *toggletoolbutton, gpointer user_data)
-{
-    control_set_hazardlights(gtk_toggle_tool_button_get_active(toggletoolbutton));
-}
-
-GtkWidget *make_toolbar(void)
-{
-    GtkWidget *toolbar;
-
-    GtkToolItem *headlights;
-    GtkToolItem *taillights;
-    GtkToolItem *hazardlights;
-
-    toolbar = gtk_toolbar_new ();
-    gtk_toolbar_set_style(GTK_TOOLBAR(toolbar), GTK_TOOLBAR_BOTH);
-
-    headlights = gtk_toggle_tool_button_new();
-    gtk_tool_button_set_label (GTK_TOOL_BUTTON (headlights), "Head Lights");
-    gtk_toolbar_insert(GTK_TOOLBAR(toolbar), headlights, -1);
-
-    taillights = gtk_toggle_tool_button_new();
-    gtk_tool_button_set_label (GTK_TOOL_BUTTON (taillights), "Tail Lights");
-    gtk_toolbar_insert(GTK_TOOLBAR(toolbar), taillights, -1);
-
-    hazardlights = gtk_toggle_tool_button_new();
-    gtk_tool_button_set_label (GTK_TOOL_BUTTON (hazardlights), "Hazard Lights");
-    gtk_toolbar_insert(GTK_TOOLBAR(toolbar), hazardlights, -1);
-
-
-
-    g_signal_connect(G_OBJECT(headlights), "toggled",
-        G_CALLBACK(toggle_headlights), NULL);
-
-    g_signal_connect(G_OBJECT(taillights), "toggled",
-        G_CALLBACK(toggle_taillights), NULL);
-
-    g_signal_connect(G_OBJECT(hazardlights), "toggled",
-        G_CALLBACK(toggle_hazardlights), NULL);
-
-    return toolbar;
-}
 
 int main (int argc, char **argv)
 {
-    GdkWindow *video_window_xwindow;
-    GtkWidget *window, *video_window, *vbox;
     GstElement *pipeline, *sink;
     gulong embed_xid;
     GstStateChangeReturn sret;
@@ -105,32 +42,16 @@ int main (int argc, char **argv)
 
     /* prepare the pipeline */
 
-    //pipeline = gst_parse_launch("rtspsrc location=\"rtsp://192.168.0.165:8554/test\" ! rtph264depay ! avdec_h264 ! xvimagesink sync=false name=sink", &err);
-    pipeline = gst_parse_launch("videotestsrc ! xvimagesink name=sink", &err);
+    pipeline = gst_parse_launch("rtspsrc location=\"rtsp://192.168.0.165:8554/test\" ! rtph264depay ! avdec_h264 ! xvimagesink sync=false name=sink", &err);
+    //pipeline = gst_parse_launch("videotestsrc ! xvimagesink name=sink", &err);
     g_assert(err == NULL);
 
     /* prepare the ui */
 
-    window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-    g_signal_connect (G_OBJECT (window), "delete-event",
-        G_CALLBACK (window_closed), (gpointer) pipeline);
-    gtk_window_set_default_size (GTK_WINDOW (window), 1000, 600);
-    gtk_window_set_title (GTK_WINDOW (window), "PiRover Control");
+    VideoWindow *w = new VideoWindow();
 
-    vbox = gtk_vbox_new(FALSE, 0);
-    gtk_container_add (GTK_CONTAINER (window), vbox);
-
-    gtk_box_pack_start(GTK_BOX(vbox), make_toolbar(), FALSE, FALSE, 5);
-
-    video_window = gtk_drawing_area_new ();
-    gtk_container_add (GTK_CONTAINER (vbox), video_window);
-
-    gtk_widget_show_all (window);
-
-    video_window_xwindow = gtk_widget_get_window (video_window);
-    embed_xid = GDK_WINDOW_XID (video_window_xwindow);
     sink = gst_bin_get_by_name_recurse_up (GST_BIN (pipeline), "sink");
-    gst_video_overlay_set_window_handle (GST_VIDEO_OVERLAY (sink), embed_xid);
+    gst_video_overlay_set_window_handle (GST_VIDEO_OVERLAY (sink), w->get_embed_xid());
     g_object_unref(sink);
 
     /* run the pipeline */
@@ -139,13 +60,14 @@ int main (int argc, char **argv)
     if (sret == GST_STATE_CHANGE_FAILURE)
         gst_element_set_state (pipeline, GST_STATE_NULL);
 
-    /* TODO: everything else */
+    /* Start input and networking */
 
     control_start();
     net_start();
 
     gtk_main ();
 
+    gst_element_set_state (pipeline, GST_STATE_NULL);
     gst_object_unref (pipeline);
     return 0;
 }
