@@ -42,7 +42,7 @@ int main (int argc, char **argv)
 
     /* prepare the pipeline */
 
-    pipeline = gst_parse_launch("rtspsrc location=\"rtsp://192.168.0.165:8554/test\" ! rtph264depay ! avdec_h264 ! xvimagesink sync=false name=sink", &err);
+    pipeline = gst_parse_launch("rtspsrc location=\"rtsp://raspberrypi.lan:8554/test\" ! rtph264depay ! avdec_h264 ! xvimagesink sync=false name=sink", &err);
     //pipeline = gst_parse_launch("videotestsrc ! xvimagesink name=sink", &err);
     g_assert(err == NULL);
 
