@@ -47,7 +47,7 @@ void net_start(void)
     socket = g_socket_new(G_SOCKET_FAMILY_IPV4, G_SOCKET_TYPE_DATAGRAM, G_SOCKET_PROTOCOL_UDP, &err);
     g_assert(err == NULL);
 
-    udpAddress = g_inet_address_new_from_string("192.168.0.165");
+    udpAddress = g_inet_address_new_from_string("10.24.42.1");
     udpSocketAddress = g_inet_socket_address_new(udpAddress, 5005);
 
     g_socket_connect(socket, udpSocketAddress, NULL, &err);
