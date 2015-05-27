@@ -120,6 +120,8 @@ void control_get_packet(char *buf)
     g_mutex_unlock (&control_mutex);
 }
 
+#define DZ (10000)
+
 static gboolean get_controls (gpointer unused, gboolean ignored)
 {
     SDL_JoystickUpdate();
@@ -127,16 +129,16 @@ static gboolean get_controls (gpointer unused, gboolean ignored)
     int b = -SDL_GameControllerGetAxis(gc, SDL_CONTROLLER_AXIS_LEFTY);
     unsigned short da = 0, db = 0;
 
-    if(a < -8000) {
+    if(a < -DZ) {
         da = 0x8000;
         a = -a;
     }
-    if(b < -8000) {
+    if(b < -DZ) {
         db = 0x8000;
         b = -b;
     }
-    if(a < 8000) a = 0;
-    if(b < 8000) b = 0;
+    if(a < DZ) a = 0;
+    if(b < DZ) b = 0;
     a = a / 7;
     b = b / 7;
     da |= a;
